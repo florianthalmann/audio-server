@@ -11,28 +11,31 @@
 	
 	app.get('/getAudioChunk', function(request, response) {
 		var filename = request.query.filename;
-		var fromSample = parseInt(request.query.fromSample);
-		var toSample = parseInt(request.query.toSample);
-		if (filename && !isNaN(fromSample) && !isNaN(toSample)) {
+		var fromSecond = parseFloat(request.query.fromSecond);
+		var toSecond = parseFloat(request.query.toSecond);
+		if (filename && !isNaN(fromSecond) && !isNaN(toSecond)) {
 			var filepath = audioLocation + filename;
 			var writer = new wav.Writer();
 			writer.pipe(response);
-			pipeWavFile(filepath, fromSample, toSample, writer);
+			pipeWavFile(filepath, fromSecond, toSecond, writer);
 		}
 	});
 	
-	function pipeWavFile(filepath, fromSample, toSample, writer) {
+	function pipeWavFile(filepath, fromSecond, toSecond, writer) {
 		var file = fs.createReadStream(filepath);
 		var reader = new wav.Reader();
 		
-		var format;
+		var format, fromSample, toSample, totalSize;
 		var numSamplesStreamed = 0;
 		var numSamplesAccumulated = 0;
-		var totalSize = toSample-fromSample;
 		var samples = []; // array that holds all the chunks
 		
 		reader.on('format', function (f) {
 			format = f;
+			var factor = f.sampleRate*f.channels*(f.bitDepth/8);
+			fromSample = Math.round(fromSecond*factor);
+			toSample = Math.round(toSecond*factor);
+			totalSize = toSample-fromSample;
 		});
 		reader.on('data', function (chunk) {
 			if (numSamplesAccumulated < totalSize) {
