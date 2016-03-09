@@ -9,7 +9,7 @@
 	
 	var audioLocation = __dirname + '/ilmaudio/wav/';
 	
-	app.get('/getAudioChunk', function(request, response) {
+	app.get('/getAudioChunk', function(request, response, next) {
 		var filename = request.query.filename;
 		var fromSecond = parseFloat(request.query.fromSecond);
 		var toSecond = parseFloat(request.query.toSecond);
@@ -55,7 +55,10 @@
 				numSamplesStreamed += chunkSize;
 			}
 		});
-		reader.on('end', function(){
+		reader.on('error', function() {
+			writer.end();
+		})
+		reader.on('end', function() {
 			writer.end();
 		});
 		file.pipe(reader);

@@ -19,6 +19,6 @@
   "homepage": "https://github.com/florianthalmann/audio-server#readme",
   "dependencies": {
     "express": "^4.13.4",
-    "wav": "^1.0.0"
+    "wav": "git+https://github.com/laser/node-wav.git"
   }
 }
